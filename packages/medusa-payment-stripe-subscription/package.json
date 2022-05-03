@@ -1,0 +1,46 @@
+{
+  "name": "medusa-payment-stripe-subscription",
+  "version": "0.0.1",
+  "description": "Stripe Subscription provider for Medusa Commerce",
+  "main": "index.js",
+  "author": "Ryan Rumlaklak",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/node": "^7.7.4",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-optional-chaining": "^7.12.7",
+    "@babel/plugin-transform-classes": "^7.9.5",
+    "@babel/plugin-transform-instanceof": "^7.8.3",
+    "@babel/plugin-transform-runtime": "^7.7.6",
+    "@babel/preset-env": "^7.7.5",
+    "@babel/register": "^7.7.4",
+    "@babel/runtime": "^7.9.6",
+    "client-sessions": "^0.8.0",
+    "cross-env": "^5.2.1",
+    "eslint": "^6.8.0",
+    "jest": "^28.0.2",
+    "medusa-test-utils": "^1.1.37",
+    "mongoose": "^6.3.0"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "packing": "rm -rf dist && npm run build && npm pack",
+    "prepare": "cross-env NODE_ENV=production npm run build",
+    "watch": "babel -w src --out-dir . --ignore **/__tests__",
+    "test": "jest"
+  },
+  "peerDependencies": {
+    "medusa-core-utils": "^1.1.31",
+    "medusa-interfaces": "^1.2.1",
+    "medusa-payment-stripe": "^1.1.38",
+    "medusa-plugin-subscription": "file:/../medusa-plugin-subscription/medusa-plugin-subscription-0.0.1.tgz",
+    "stripe": "^8.50.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
+  },
+  "gitHead": "81a7ff73d012fda722f6e9ef0bd9ba0232d37808"
+}
