@@ -32,15 +32,15 @@
     "test": "jest"
   },
   "peerDependencies": {
-    "medusa-core-utils": "^1.1.31",
-    "medusa-interfaces": "^1.2.1",
-    "medusa-payment-stripe": "^1.1.38",
-    "medusa-plugin-subscription": "file:/../medusa-plugin-subscription/medusa-plugin-subscription-0.0.1.tgz",
-    "stripe": "^8.50.0"
+    "medusa-interfaces": "1.x"
   },
   "dependencies": {
+    "@medusajs/medusa": "file:../medusa/medusajs-medusa-1.2.1.tgz",
     "body-parser": "^1.19.0",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "medusa-core-utils": "^1.1.31",
+    "medusa-payment-stripe": "^1.1.38",
+    "stripe": "^8.50.0"
   },
   "gitHead": "81a7ff73d012fda722f6e9ef0bd9ba0232d37808"
 }

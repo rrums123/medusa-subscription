@@ -1,3 +1,5 @@
+const dotenv = require('dotenv')
+
 // CORS when consuming Medusa from admin
 const ADMIN_CORS = process.env.ADMIN_CORS || "http://localhost:7000,http://localhost:7001";
 
@@ -26,14 +28,13 @@ const plugins = [
             webhook_secret: STRIPE_WEBHOOK_SECRET,
         },
     },
-    `medusa-plugin-subscription`,
-    {
-        resolve: `medusa-payment-stripe-subscription`,
-        options: {
-            api_key: STRIPE_API_KEY,
-            webhook_secret: STRIPE_WEBHOOK_SECRET,
-        },
-    }
+    // {
+    //     resolve: `medusa-payment-stripe-subscription`,
+    //     options: {
+    //         api_key: STRIPE_API_KEY,
+    //         webhook_secret: STRIPE_WEBHOOK_SECRET,
+    //     },
+    // }
 ];
 
 module.exports = {
