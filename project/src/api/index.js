@@ -1,13 +1,10 @@
-import { Router } from "express"
 import admin from "./routes/admin"
-import store from "./routes/store"
+import { Router } from "express"
+import bodyParser from "body-parser"
+export default () => {
+    const router = Router()
+    router.use(bodyParser.json())
+    admin(router)
 
-// guaranteed to get dependencies
-export default (rootDirectory) => {
-    const app = Router()
-
-    admin(app, rootDirectory)
-    store(app, rootDirectory)
-
-    return app
+    return router;
 }
