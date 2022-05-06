@@ -1,4 +1,3 @@
-import _ from "lodash"
 import Stripe from "stripe"
 import {PaymentService} from "medusa-interfaces"
 
@@ -45,6 +44,14 @@ class StripeSubscriptionService extends PaymentService {
 
         /** @private @const {SubscriptionService} */
         this.subcriptionService_ = subscriptionService
+    }
+
+    async createPortalSession(customerId) {
+        const customer = await this.customerService_.retrieve(customerId)
+        return  this.stripe_.billingPortal.sessions.create({
+            customer: customer.metadata.stripe_id,
+            return_url: this.options_.return_url,
+        });
     }
 
     /**
