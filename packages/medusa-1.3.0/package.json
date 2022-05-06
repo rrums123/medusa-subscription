@@ -39,6 +39,7 @@
     "watch": "tsc --build --watch",
     "prepare": "cross-env NODE_ENV=production npm run build",
     "build": "tsc --build",
+    "packing": "npm run build && npm pack",
     "serve": "node dist/app.js",
     "test": "jest",
     "test:unit": "jest"

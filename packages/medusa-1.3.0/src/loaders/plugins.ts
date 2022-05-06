@@ -247,6 +247,7 @@ function registerApi(
  */
 async function registerServices(pluginDetails: PluginDetails, container: MedusaContainer): Promise<void> {
   const files = glob.sync(`${pluginDetails.resolve}/services/[!__]*`, {})
+  console.info(files)
   await Promise.all(
     files.map(async (fn) => {
       const loaded = require(fn).default
@@ -369,7 +370,7 @@ function registerSubscribers(pluginDetails: PluginDetails, container: MedusaCont
   const files = glob.sync(`${pluginDetails.resolve}/subscribers/*.js`, {})
   files.forEach((fn) => {
     const loaded = require(fn).default
-
+    console.info("registerSubscribers - " + pluginDetails.name)
     container.build(
       asFunction(
         (cradle) => new loaded(cradle, pluginDetails.options)
