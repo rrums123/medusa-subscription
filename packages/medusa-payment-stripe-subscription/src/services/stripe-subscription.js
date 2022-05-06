@@ -147,7 +147,7 @@ class StripeSubscriptionService extends PaymentService {
 
         const subscriptionObject = {
             id: subscriptionStripe.id,
-            status: "incomplete",
+            status: subscriptionStripe.status,
             items: items
         }
 
