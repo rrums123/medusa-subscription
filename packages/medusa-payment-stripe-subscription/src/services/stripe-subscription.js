@@ -91,7 +91,7 @@ class StripeSubscriptionService extends PaymentService {
      * @returns {object} Stripe payment intent
      */
     async createPayment(cart) {
-        const {customer_id, region_id, email} = cart
+        let {customer_id, region_id, email} = cart
         const region = await this.regionService_.retrieve(region_id)
         const {currency_code} = region
 
@@ -114,29 +114,22 @@ class StripeSubscriptionService extends PaymentService {
             items.push({ price: price.id })
         }
 
-        const subscriptionObject = {
-            status: "incomplete",
-            items: items
-        }
-
-        const subscription = await this.subcriptionService_.create(subscriptionObject)
-
         const subscriptionRequest = {
-            id: subscription.id,
             items: items,
             expand: ['latest_invoice.payment_intent'],
-            payment_behavior: 'default_incomplete',
-            metadata: {cart_id: `${cart.id}`},
+            payment_behavior: 'default_incomplete'
         }
 
         if (customer_id) {
             const customer = await this.customerService_.retrieve(customer_id)
+            email = customer.email
 
             if (customer.metadata?.stripe_id) {
                 subscriptionRequest.customer = customer.metadata.stripe_id
             } else {
                 const stripeCustomer = await this.createCustomer({
-                    email,
+                    email: email,
+                    name: customer.name,
                     id: customer_id,
                 })
 
@@ -150,9 +143,17 @@ class StripeSubscriptionService extends PaymentService {
             subscriptionRequest.customer = stripeCustomer.id
         }
 
-        const subscriptionStripe = await this.subscriptionService.create(subscriptionRequest);
+        const subscriptionStripe = await this.stripe_.subscriptions.create(subscriptionRequest);
 
-        return subscriptionStripe
+        const subscriptionObject = {
+            id: subscriptionStripe.id,
+            status: "incomplete",
+            items: items
+        }
+
+        const subscription = await this.subcriptionService_.create(subscriptionObject)
+
+        return subscription
     }
 
     /**
