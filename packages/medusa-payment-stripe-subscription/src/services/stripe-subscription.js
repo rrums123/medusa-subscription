@@ -1,4 +1,3 @@
-import _ from "lodash"
 import Stripe from "stripe"
 import {PaymentService} from "medusa-interfaces"
 
@@ -51,6 +50,14 @@ class StripeSubscriptionService extends PaymentService {
         this.cartService_ = cartService
     }
 
+    async createPortalSession(customerId) {
+        const customer = await this.customerService_.retrieve(customerId)
+        return  this.stripe_.billingPortal.sessions.create({
+            customer: customer.metadata.stripe_id,
+            return_url: this.options_.return_url,
+        });
+    }
+
     /**
      * Fetches Stripe payment intent. Check its status and returns the
      * corresponding Medusa status.
@@ -98,8 +105,6 @@ class StripeSubscriptionService extends PaymentService {
         let {customer_id, region_id, email} = cart
         const region = await this.regionService_.retrieve(region_id)
         const {currency_code} = region
-
-        const amount = await this.totalsService_.getTotal(cart)
 
         const cart_items = cart.items;
         const items = [];
@@ -153,7 +158,7 @@ class StripeSubscriptionService extends PaymentService {
         const subscriptionObject = {
             id: subscriptionStripe.id,
             status: subscriptionStripe.status,
-            items: items
+            items: subscriptionStripe.items.data
         }
 
         const subscription = await this.subcriptionService_.create(subscriptionObject)
@@ -165,7 +170,7 @@ class StripeSubscriptionService extends PaymentService {
             metadata: { cart_id: `${cart.id}` }
         })
 
-        return subscription
+        return subscriptionObject
     }
 
     /**
@@ -224,17 +229,10 @@ class StripeSubscriptionService extends PaymentService {
     async updatePayment(sessionData, cart) {
         try {
             const stripeId = cart.customer?.metadata?.stripe_id || undefined
-
             if (stripeId !== sessionData.customer) {
                 return this.createPayment(cart)
             } else {
-                if (cart.total && sessionData.amount === Math.round(cart.total)) {
-                    return sessionData
-                }
-
-                return this.stripe_.paymentIntents.update(sessionData.id, {
-                    amount: Math.round(cart.total),
-                })
+                return sessionData
             }
         } catch (error) {
             throw error
