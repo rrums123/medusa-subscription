@@ -95,8 +95,6 @@ class StripeSubscriptionService extends PaymentService {
         const region = await this.regionService_.retrieve(region_id)
         const {currency_code} = region
 
-        const amount = await this.totalsService_.getTotal(cart)
-
         const cart_items = cart.items;
         const items = [];
 
@@ -148,12 +146,12 @@ class StripeSubscriptionService extends PaymentService {
         const subscriptionObject = {
             id: subscriptionStripe.id,
             status: subscriptionStripe.status,
-            items: items
+            items: subscriptionStripe.items.data
         }
 
         const subscription = await this.subcriptionService_.create(subscriptionObject)
 
-        return subscription
+        return subscriptionObject
     }
 
     /**
@@ -212,17 +210,10 @@ class StripeSubscriptionService extends PaymentService {
     async updatePayment(sessionData, cart) {
         try {
             const stripeId = cart.customer?.metadata?.stripe_id || undefined
-
             if (stripeId !== sessionData.customer) {
                 return this.createPayment(cart)
             } else {
-                if (cart.total && sessionData.amount === Math.round(cart.total)) {
-                    return sessionData
-                }
-
-                return this.stripe_.paymentIntents.update(sessionData.id, {
-                    amount: Math.round(cart.total),
-                })
+                return sessionData
             }
         } catch (error) {
             throw error
