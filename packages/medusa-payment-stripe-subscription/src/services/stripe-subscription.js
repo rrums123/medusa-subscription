@@ -11,7 +11,8 @@ class StripeSubscriptionService extends PaymentService {
             customerService,
             totalsService,
             regionService,
-            subscriptionService
+            subscriptionService,
+            cartService
         },
         options
     ) {
@@ -45,6 +46,9 @@ class StripeSubscriptionService extends PaymentService {
 
         /** @private @const {SubscriptionService} */
         this.subcriptionService_ = subscriptionService
+
+        /** @private @const {CartService} */
+        this.cartService_ = cartService
     }
 
     /**
@@ -117,7 +121,8 @@ class StripeSubscriptionService extends PaymentService {
         const subscriptionRequest = {
             items: items,
             expand: ['latest_invoice.payment_intent'],
-            payment_behavior: 'default_incomplete'
+            payment_behavior: 'default_incomplete',
+            metadata: { cart_id: `${cart.id}` }
         }
 
         if (customer_id) {
@@ -152,6 +157,13 @@ class StripeSubscriptionService extends PaymentService {
         }
 
         const subscription = await this.subcriptionService_.create(subscriptionObject)
+        const cartUpdate = await this.cartService_.update(cart.id, {
+            subscription_id: subscription.id,
+            external_id: subscriptionStripe.latest_invoice.id
+        })
+        const invoice = await this.stripe_.invoices.update(subscriptionStripe.latest_invoice.id, {
+            metadata: { cart_id: `${cart.id}` }
+        })
 
         return subscription
     }
