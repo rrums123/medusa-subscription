@@ -58,24 +58,18 @@ class SubscriptionService extends BaseService {
 
             let subscription = subscriptionRepo.create(rest)
             subscription = await subscriptionRepo.save(subscription)
-
-            subscription.items = await Promise.all(
-                items.map(async (o) => {
-                    const res = subscriptionItemRepo.create({...o, subscription_id: subscription.id})
-                    await subscriptionItemRepo.save(res)
-                    return res
+            await subscriptionItemRepo.save(items.map((o) => {
+                    return subscriptionItemRepo.create({...o, subscription_id: subscription.id})
                 })
             )
-
-            const result = await this.retrieve(subscription.id, {relations: ["variant", "items", "line_items"]})
 
             await this.eventBus_
                 .withTransaction(manager)
                 .emit(SubscriptionService.Events.CREATED, {
-                    id: result.id,
+                    id: subscription.id,
                 })
 
-            return result
+            return this.retrieve(subscription.id)
         })
     }
 
