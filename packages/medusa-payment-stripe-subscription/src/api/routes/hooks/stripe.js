@@ -86,7 +86,14 @@ export default async (req, res) => {
          * Sent when a customer’s subscription ends.
          */
         case 'customer.subscription.deleted':
-            await subscriptionService.delete(subscription.subscription.id)
+            if (event.request != null) {
+                // handle a subscription cancelled by your request
+                // from above.
+            } else {
+                // handle subscription cancelled automatically based
+                // upon your subscription settings.
+                await subscriptionService.delete(subscription.subscription.id)
+            }
             break
         /**
          * Sent when the subscription is successfully started, after the payment is confirmed.
