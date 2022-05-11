@@ -180,7 +180,7 @@ class StripeSubscriptionService extends PaymentService {
      */
     async retrievePayment(data) {
         try {
-            return this.stripe_.subscriptions.retrieve(data.id)
+            return this.stripe_.subscriptions.retrieve(data.id,{expand:['latest_invoice','latest_invoice.payment_intent']})
         } catch (error) {
             throw error
         }
@@ -193,7 +193,7 @@ class StripeSubscriptionService extends PaymentService {
      */
     async getPaymentData(sessionData) {
         try {
-            return this.stripe_.subscriptions.retrieve(sessionData.data.id)
+            return this.stripe_.subscriptions.retrieve(sessionData.data.id,{expand:['latest_invoice','latest_invoice.payment_intent']})
         } catch (error) {
             throw error
         }
@@ -207,7 +207,7 @@ class StripeSubscriptionService extends PaymentService {
      * @returns {Promise<{ status: string, data: object }>} result with data and status
      */
     async authorizePayment(sessionData, context = {}) {
-        const stat = await this.getStatus(sessionData.data.latest_invoice.payment_intent)
+        const stat = await this.getStatus(sessionData.data)
 
         try {
             return {data: sessionData.data, status: stat}
