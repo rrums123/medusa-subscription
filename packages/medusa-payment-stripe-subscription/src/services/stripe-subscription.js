@@ -164,13 +164,14 @@ class StripeSubscriptionService extends PaymentService {
         const subscription = await this.subcriptionService_.create(subscriptionObject)
         const cartUpdate = await this.cartService_.update(cart.id, {
             subscription_id: subscription.id,
-            external_id: subscriptionStripe.latest_invoice.id
+            metadata: { invoice_id: subscriptionStripe.latest_invoice.id }
         })
+
         const invoice = await this.stripe_.invoices.update(subscriptionStripe.latest_invoice.id, {
             metadata: { cart_id: `${cart.id}` }
         })
 
-        return subscriptionObject
+        return invoice
     }
 
     /**

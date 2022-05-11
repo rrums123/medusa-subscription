@@ -1,3 +1,5 @@
+import cart from "../../../subscribers/cart";
+
 export default async (req, res) => {
     const signature = req.headers["stripe-signature"]
 
@@ -16,23 +18,33 @@ export default async (req, res) => {
     const orderService = req.scope.resolve("orderService")
     const subscriptionService = req.scope.resolve("subscriptionService")
 
+    let cartId = null
+    let order = null
+    let invoice = null
+    let subscription = null
+    let paymentIntent = null
+
     if (object.object === 'payment_intent') {
-        const paymentIntent = object
-        const cartId = paymentIntent.metadata.cart_id
-        const order = await orderService
+        paymentIntent = object
+        cartId = paymentIntent.metadata.cart_id
+        order = await orderService
             .retrieveByCartId(cartId)
             .catch(() => undefined)
     }
 
     if (object.object === 'subscription') {
-        const subscription = object
+        subscription = object
     }
 
     if (object.object === 'invoice') {
-        const invoice = object
-        const subscription = subscriptionService.retrieve(invoice.subscription)
+        invoice = object
+        subscription = subscriptionService.retrieve(invoice.subscription)
+        if ('cart_id' in invoice.metadata) {
+            cartId = invoice.metadata.cart_id
+        } else {
+            cartId = invoice.lines.data[0].metadata.cart_id
+        }
     }
-
 
     console.info(event.type)
     // handle stripe events
@@ -66,7 +78,6 @@ export default async (req, res) => {
             }
             break
 
-
         /**
          * Sent when a Customer is successfully created.
          */
@@ -80,13 +91,14 @@ export default async (req, res) => {
          * or if you set payment_behavior to default_incomplete.
          */
         case 'customer.subscription.created':
+            // TODO: Not implemented yet
             break
 
         /**
          * Sent when a customer’s subscription ends.
          */
         case 'customer.subscription.deleted':
-            await subscriptionService.delete(subscription.subscription.id)
+            await subscriptionService.delete(subscription.id)
             break
         /**
          * Sent when the subscription is successfully started, after the payment is confirmed.
@@ -94,8 +106,8 @@ export default async (req, res) => {
          * For example, adding a coupon, applying a discount, adding an invoice item, and changing plans all trigger this event.
          */
         case 'customer.subscription.updated':
-            await subscriptionService.update(subscription.subscription.id, {
-                status: subscription.subscription.status
+            await subscriptionService.update(subscription.id, {
+                status: subscription.status
             })
             break
 
@@ -123,13 +135,8 @@ export default async (req, res) => {
             break
 
         case 'invoice.finalized':
-            console.info(object)
-
-            if (!order) {
-                await cartService.setPaymentSession(cartId, "stripe-subscription")
-                await cartService.authorizePayment(cartId)
-                await orderService.createFromCart(cartId)
-            }
+            // await cartService.setPaymentSession(cartId, "stripe-subscription")
+            // await orderService.createFromCart(cartId)
             break
 
         /**
@@ -156,6 +163,12 @@ export default async (req, res) => {
          * * If you’re using PaymentIntents, collect new payment information and confirm the PaymentIntent.
          * * Update the default payment method on the subscription.
          */
+        case 'invoice.payment_succeeded':
+            const subscriptionId = object.subscription
+            subscription = await subscriptionService.update(subscriptionId, {
+
+            })
+            break
         case 'invoice.payment_failed':
             break
 
@@ -181,6 +194,7 @@ export default async (req, res) => {
          * Sent when a PaymentIntent is created.
          */
         case 'payment_intent.created':
+
             break
 
         default:
