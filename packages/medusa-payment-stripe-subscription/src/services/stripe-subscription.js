@@ -52,7 +52,7 @@ class StripeSubscriptionService extends PaymentService {
 
     async createPortalSession(customerId) {
         const customer = await this.customerService_.retrieve(customerId)
-        return  this.stripe_.billingPortal.sessions.create({
+        return this.stripe_.billingPortal.sessions.create({
             customer: customer.metadata.stripe_id,
             return_url: this.options_.return_url,
         });
@@ -65,7 +65,7 @@ class StripeSubscriptionService extends PaymentService {
      * @returns {string} the status of the payment intent
      */
     async getStatus(paymentData) {
-        return await this.stripeProviderService_.getStatus(paymentData)
+        return  this.stripeProviderService_.getStatus(paymentData.latest_invoice.payment_intent)
     }
 
     /**
@@ -74,7 +74,7 @@ class StripeSubscriptionService extends PaymentService {
      * @returns {Promise<Array<object>>} saved payments methods
      */
     async retrieveSavedMethods(customer) {
-        return Promise.resolve([])
+        return this.stripeProviderService_.retrieveSavedMethods(customer)
     }
 
     /**
@@ -127,7 +127,7 @@ class StripeSubscriptionService extends PaymentService {
             items: items,
             expand: ['latest_invoice.payment_intent'],
             payment_behavior: 'default_incomplete',
-            metadata: { cart_id: `${cart.id}` }
+            metadata: {cart_id: `${cart.id}`}
         }
 
         if (customer_id) {
@@ -162,8 +162,9 @@ class StripeSubscriptionService extends PaymentService {
         }
 
         const subscription = await this.subcriptionService_.create(subscriptionObject)
-        const cartUpdate = await this.cartService_.update(cart.id, {
-            subscription_id: subscription.id,
+
+        await this.cartService_.update(cart.id, {
+            subscription_id: subscriptionStripe.id,
             metadata: { invoice_id: subscriptionStripe.latest_invoice.id }
         })
 
@@ -171,7 +172,7 @@ class StripeSubscriptionService extends PaymentService {
             metadata: { cart_id: `${cart.id}` }
         })
 
-        return invoice
+        return subscriptionStripe
     }
 
     /**
@@ -181,7 +182,7 @@ class StripeSubscriptionService extends PaymentService {
      */
     async retrievePayment(data) {
         try {
-            return this.stripe_.paymentIntents.retrieve(data.id)
+            return this.stripe_.subscriptions.retrieve(data.id,{expand:['latest_invoice','latest_invoice.payment_intent']})
         } catch (error) {
             throw error
         }
@@ -194,7 +195,7 @@ class StripeSubscriptionService extends PaymentService {
      */
     async getPaymentData(sessionData) {
         try {
-            return this.stripe_.paymentIntents.retrieve(data.id)
+            return this.stripe_.subscriptions.retrieve(sessionData.data.id,{expand:['latest_invoice','latest_invoice.payment_intent']})
         } catch (error) {
             throw error
         }
@@ -208,17 +209,17 @@ class StripeSubscriptionService extends PaymentService {
      * @returns {Promise<{ status: string, data: object }>} result with data and status
      */
     async authorizePayment(sessionData, context = {}) {
-        return await this.stripeProviderService_.authorizePayment(
-            sessionData,
-            context
-        )
+        const stat = await this.getStatus(sessionData.data)
+
+        try {
+            return {data: sessionData.data, status: stat}
+        } catch (error) {
+            throw error
+        }
     }
 
-    async updatePaymentData(sessionData, update) {
-        return await this.stripeProviderService_.updatePaymentData(
-            sessionData,
-            update
-        )
+    async updatePaymentData(sessionData, updatedData) {
+      return updatedData;
     }
 
     /**
@@ -241,20 +242,18 @@ class StripeSubscriptionService extends PaymentService {
     }
 
     async deletePayment(payment) {
-        return await this.stripeProviderService_.deletePayment(payment)
-    }
+        try {
+            const {id} = payment.data
+            return this.stripe_.subscriptions.del(id).catch((err) => {
+                if (err.statusCode === 400) {
+                    return
+                }
+                throw err
+            })
+        } catch (error) {
+            throw error
+        }
 
-    /**
-     * Updates customer of Stripe payment intent.
-     * @param {string} paymentIntentId - id of payment intent to update
-     * @param {string} customerId - id of new Stripe customer
-     * @returns {object} Stripe payment intent
-     */
-    async updatePaymentIntentCustomer(paymentIntentId, customerId) {
-        return await this.stripeProviderService_.updatePaymentIntentCustomer(
-            paymentIntentId,
-            customerId
-        )
     }
 
     /**
@@ -263,7 +262,12 @@ class StripeSubscriptionService extends PaymentService {
      * @returns {object} Stripe payment intent
      */
     async capturePayment(payment) {
-        return await this.stripeProviderService_.capturePayment(payment)
+        const {id} = payment.data
+        try {
+            return  this.stripe_.subscriptions.retrieve(id)
+        } catch (error) {
+            throw error
+        }
     }
 
     /**
@@ -273,10 +277,18 @@ class StripeSubscriptionService extends PaymentService {
      * @returns {string} refunded payment intent
      */
     async refundPayment(payment, amountToRefund) {
-        return await this.stripeProviderService_.refundPayment(
-            payment,
-            amountToRefund
-        )
+        const {id} = payment.data.latest_invoice.payment_intent
+        try {
+            await this.stripe_.refunds.create({
+                amount: Math.round(amountToRefund),
+                payment_intent: id,
+            })
+
+            return payment.data
+        } catch (error) {
+            throw error
+        }
+
     }
 
     /**
@@ -285,7 +297,16 @@ class StripeSubscriptionService extends PaymentService {
      * @returns {object} canceled payment intent
      */
     async cancelPayment(payment) {
-        return await this.stripeProviderService_.cancelPayment(payment)
+        const {id} = payment.data.latest_invoice.payment_intent
+        try {
+            return this.stripe_.paymentIntents.cancel(id)
+        } catch (error) {
+            if (error.payment_intent.status === "canceled") {
+                return error.payment_intent
+            }
+
+            throw error
+        }
     }
 
     /**

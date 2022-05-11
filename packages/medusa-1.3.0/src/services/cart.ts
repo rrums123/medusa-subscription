@@ -448,6 +448,10 @@ class CartService extends BaseService {
           }
         }
 
+        if ("subscription_id" in data) {
+          rawCart.subscription_id = data.subscription_id!
+        }
+
         const createdCart = cartRepo.create(rawCart)
         const cart = await cartRepo.save(createdCart)
         await this.eventBus_
@@ -873,6 +877,10 @@ class CartService extends BaseService {
 
         if ("payment_authorized_at" in data) {
           cart.payment_authorized_at = data.payment_authorized_at!
+        }
+
+        if ("subscription_id" in data) {
+          cart.subscription_id = data.subscription_id!
         }
 
         const updatedCart = await cartRepo.save(cart)
