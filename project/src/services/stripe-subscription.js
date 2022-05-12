@@ -26,6 +26,9 @@ class StripeSubscriptionService extends PaymentService {
          *    capture: true
          *  }
          */
+        options = {
+            api_key: process.env.STRIPE_API_KEY,
+        }
         this.options_ = options
 
         /** @private @const {Stripe} */
