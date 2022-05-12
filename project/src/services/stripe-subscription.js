@@ -27,7 +27,8 @@ class StripeSubscriptionService extends PaymentService {
          *  }
          */
         options = {
-            api_key: process.env.STRIPE_API_KEY,
+            // api_key: process.env.STRIPE_API_KEY,
+            api_key: 'sk_test_51KedmEDFUo7wZbIt7ceD43xQ7T4eYKEOUffBJ5ECOuumqFOx6y0riAviO9smqEBQVMLBlQGYXxkNAZhxG7Mg9Knb00Go9Mjo6X',
         }
         this.options_ = options
 

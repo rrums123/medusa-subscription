@@ -18,8 +18,8 @@ class StripeProviderService extends PaymentService {
      *  }
      */
     options = {
-      api_key: process.env.STRIPE_API_KEY,
-      webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
+      api_key: 'sk_test_51KedmEDFUo7wZbIt7ceD43xQ7T4eYKEOUffBJ5ECOuumqFOx6y0riAviO9smqEBQVMLBlQGYXxkNAZhxG7Mg9Knb00Go9Mjo6X',
+      webhook_secret: 'whsec_3c3f55b768a24bb92ed4165cb07c851c247f5e8710eb951294078647b05d9d7e',
     }
     this.options_ = options
 

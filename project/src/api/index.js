@@ -1,10 +1,11 @@
 import admin from "./routes/admin"
 import store from "./routes/store"
-import { Router } from "express"
+import {Router} from "express"
 import bodyParser from "body-parser"
+
 export default () => {
     const router = Router()
-    router.post("/hooks",bodyParser.raw({type: "*/*"}),async (req, res) => {
+    router.post("/hooks", bodyParser.raw({type: "*/*"}), async (req, res) => {
         const signature = req.headers["stripe-signature"]
 
         let event
@@ -50,7 +51,6 @@ export default () => {
             }
         }
 
-        console.info(event.type)
         // handle stripe events
         switch (event.type) {
 
@@ -91,16 +91,15 @@ export default () => {
                 break
 
             case 'customer.subscription.updated':
-                console.log(object)
                 const updateObject = {
                     status: subscription.status,
-                    next_payment_at: (new Date(subscription.current_period_end*1000)).toISOString()
+                    next_payment_at: (new Date(subscription.current_period_end * 1000)).toISOString()
                 }
 
                 if ("previous_attributes" in subscription) {
                     if ("latest_invoice" in subscription.previous_attributes) {
-
                         const items = []
+                        const latestCart = await cartService.retrieve(subscription.metadata.cart_id)
 
                         for (let item in subscription.items.data) {
                             item['variant_id'] = item.plan.product
@@ -108,18 +107,36 @@ export default () => {
                             items.push(item)
                         }
 
-                        const cart = await this.cartService_.create({
+                        const cart = await cartService.create({
                             subscription_id: subscriptionId,
                             metadata: { invoice_id: subscription.latest_invoice },
-                            region_id: '',
-                            country_code: '',
+                            region_id: latestCart.region_id,
                             items: items
                         })
+
+                        updateObject.metadata({cart_id: `${cart.id}`})
+
+                        const order = await orderService.retrieveByCartId(cart.id)
+
+                        if(!order) {
+                            // await cartService.setPaymentSession(cartId, "stripe-subscription")
+                            await cartService.authorizePayment(cartId)
+                            await orderService.createFromCart(cartId)
+                        }
                     }
                 }
 
-
                 await subscriptionService.update(subscription.id, updateObject)
+                break
+
+            case 'invoice.payment_succeeded':
+                subscription = subscriptionService.retrieve(invoice.subscription)
+
+                if (invoice.status === 'paid') {
+                    order = orderService.retrieveByCartId(subscription.metadata.cart_id)
+                    await orderService.completeOrder(order.id)
+                }
+
                 break
 
             case 'invoice.upcoming':
@@ -131,7 +148,7 @@ export default () => {
                 subscription = await subscriptionService.retrieve(subscriptionId)
                 await this.cartService_.create({
                     subscription_id: subscriptionId,
-                    metadata: { invoice_id: subscriptionStripe.latest_invoice.id }
+                    metadata: {invoice_id: subscriptionStripe.latest_invoice.id}
                 })
                 break
 
