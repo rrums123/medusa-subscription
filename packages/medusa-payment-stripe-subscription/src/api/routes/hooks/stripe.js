@@ -89,13 +89,13 @@ export default async (req, res) => {
         case 'customer.subscription.updated':
             const updateObject = {
                 status: subscription.status,
-                next_payment_at: subscription.current_period_end
+                next_payment_at: (new Date(subscription.current_period_end*1000)).toISOString()
             }
 
             if ("previous_attributes" in subscription) {
                 if ("latest_invoice" in subscription.previous_attributes) {
-
                     const items = []
+                    const latestCart = await cartService.retrieve(subscription.metadata.cart_id)
 
                     for (let item in subscription.items.data) {
                         item['variant_id'] = item.plan.product
@@ -103,13 +103,14 @@ export default async (req, res) => {
                         items.push(item)
                     }
 
-                    const cart = await this.cartService_.create({
+                    const cart = await cartService.create({
                         subscription_id: subscriptionId,
                         metadata: { invoice_id: subscription.latest_invoice },
-                        region_id: '',
-                        country_code: '',
+                        region_id: latestCart.region_id,
                         items: items
                     })
+
+                    updateObject.metadata({cart_id: `${cart.id}`})
                 }
             }
 
@@ -119,15 +120,6 @@ export default async (req, res) => {
 
         case 'invoice.upcoming':
             // TODO: push notification to user
-            break
-
-        case 'invoice.created':
-            const subscriptionId = object.subscription
-            subscription = await subscriptionService.retrieve(subscriptionId)
-            await this.cartService_.create({
-                subscription_id: subscriptionId,
-                metadata: { invoice_id: subscriptionStripe.latest_invoice.id }
-            })
             break
 
         default:
