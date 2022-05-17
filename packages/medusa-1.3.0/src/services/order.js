@@ -397,10 +397,11 @@ class OrderService extends BaseService {
     const raw = await orderRepo.findOne(query)
 
     if (!raw) {
-      throw new MedusaError(
-        MedusaError.Types.NOT_FOUND,
-        `Order with cart id: ${cartId} was not found`
-      )
+      return raw
+      // throw new MedusaError(
+      //   MedusaError.Types.NOT_FOUND,
+      //   `Order with cart id: ${cartId} was not found`
+      // )
     }
 
     const order = await this.decorateTotals_(raw, totalsToSelect)

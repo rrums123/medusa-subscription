@@ -2,10 +2,12 @@ import admin from "./routes/admin"
 import store from "./routes/store"
 import {Router} from "express"
 import bodyParser from "body-parser"
+import {MedusaError} from "medusa-core-utils";
 
 export default () => {
     const router = Router()
-    router.post("/hooks", bodyParser.raw({type: "*/*"}), async (req, res) => {
+
+    router.post('hooks', bodyParser.raw({type: "*/*"}), async (req, res) => {
         const signature = req.headers["stripe-signature"]
 
         let event
@@ -22,6 +24,8 @@ export default () => {
         const cartService = req.scope.resolve("cartService")
         const orderService = req.scope.resolve("orderService")
         const subscriptionService = req.scope.resolve("subscriptionService")
+        const stripeSubscriptionService = req.scope.resolve("stripeSubscriptionService")
+        const customerService = req.scope.resolve("customerService")
 
         let cartId = null
         let order = null
@@ -51,6 +55,7 @@ export default () => {
             }
         }
 
+        console.info(event.type)
         // handle stripe events
         switch (event.type) {
 
@@ -78,7 +83,51 @@ export default () => {
                 break
 
             case 'customer.subscription.created':
-                // TODO: Not implemented yet
+                subscription = object
+                let subscriptionData = await subscriptionService.retrieve(subscription.id)
+
+                if (!subscriptionData) {
+                    const customerStripe = await stripeSubscriptionService.getCustomer(subscription.customer)
+                    const items = []
+
+                    let customer = await customerService.retrieve(customerStripe.id)
+
+                    if (customer instanceof MedusaError) {
+                        customer = await customerService.create({
+                            id: customerStripe.id,
+                            email: customerStripe.email,
+                            first_name: customerStripe.name,
+                            last_name: customerStripe.name,
+                            password: "password",
+                            phone: customerStripe.phone
+                        })
+                    }
+
+                    for (let item of subscription.items.data) {
+                        items.push({
+                            variant_id: item.plan.product,
+                            quantity: item.quantity,
+                        })
+                    }
+
+                    const subscriptionObject = {
+                        id: subscription.id,
+                        status: subscription.status,
+                        items: subscription.items.data,
+                        metadata: {cart_id: `${cart.id}`}
+                    }
+
+                    subscriptionData = await subscriptionService.create(subscriptionObject)
+
+                    let cart = await cartService.create({
+                        metadata: { invoice_id: subscription.latest_invoice },
+                        country_code: customerStripe.address.country,
+                        region_id: 'reg_01G278B83GDM7Y91ZES5TVH8R1',
+                        items: items,
+                        subscription_id: subscription.id
+                    })
+                }
+
                 break
 
             case 'customer.subscription.deleted':
@@ -91,8 +140,10 @@ export default () => {
                 break
 
             case 'customer.subscription.updated':
+                subscription = object
+
                 const updateObject = {
-                    status: subscription.status,
+                    status: object.status,
                     next_payment_at: (new Date(subscription.current_period_end * 1000)).toISOString()
                 }
 
@@ -101,14 +152,15 @@ export default () => {
                         const items = []
                         const latestCart = await cartService.retrieve(subscription.metadata.cart_id)
 
-                        for (let item in subscription.items.data) {
-                            item['variant_id'] = item.plan.product
-                            item['quantity'] = item.plan.quantity
-                            items.push(item)
+                        for (let item of subscription.items.data) {
+                            items.push({
+                                variant_id: item.plan.product,
+                                quantity: item.quantity,
+                            })
                         }
 
                         const cart = await cartService.create({
-                            subscription_id: subscriptionId,
+                            subscription_id: subscription.id,
                             metadata: { invoice_id: subscription.latest_invoice },
                             region_id: latestCart.region_id,
                             items: items
@@ -119,7 +171,7 @@ export default () => {
                         const order = await orderService.retrieveByCartId(cart.id)
 
                         if(!order) {
-                            // await cartService.setPaymentSession(cartId, "stripe-subscription")
+                            await cartService.setPaymentSession(cartId, "stripe-subscription")
                             await cartService.authorizePayment(cartId)
                             await orderService.createFromCart(cartId)
                         }
@@ -130,9 +182,9 @@ export default () => {
                 break
 
             case 'invoice.payment_succeeded':
-                subscription = subscriptionService.retrieve(invoice.subscription)
+                subscription = await subscriptionService.retrieve(invoice.subscription)
 
-                if (invoice.status === 'paid') {
+                if (subscription && invoice.status === 'paid') {
                     order = orderService.retrieveByCartId(subscription.metadata.cart_id)
                     await orderService.completeOrder(order.id)
                 }
@@ -143,15 +195,6 @@ export default () => {
                 // TODO: push notification to user
                 break
 
-            case 'invoice.created':
-                const subscriptionId = object.subscription
-                subscription = await subscriptionService.retrieve(subscriptionId)
-                await this.cartService_.create({
-                    subscription_id: subscriptionId,
-                    metadata: {invoice_id: subscriptionStripe.latest_invoice.id}
-                })
-                break
-
             default:
                 res.sendStatus(204)
                 return
@@ -159,8 +202,8 @@ export default () => {
 
         res.sendStatus(200)
     })
-    router.use(bodyParser.json())
 
+    router.use(bodyParser.json())
     admin(router)
     store(router)
 

@@ -26,10 +26,6 @@ class StripeSubscriptionService extends PaymentService {
          *    capture: true
          *  }
          */
-        options = {
-            // api_key: process.env.STRIPE_API_KEY,
-            api_key: 'sk_test_51KedmEDFUo7wZbIt7ceD43xQ7T4eYKEOUffBJ5ECOuumqFOx6y0riAviO9smqEBQVMLBlQGYXxkNAZhxG7Mg9Knb00Go9Mjo6X',
-        }
         this.options_ = options
 
         /** @private @const {Stripe} */
@@ -162,7 +158,8 @@ class StripeSubscriptionService extends PaymentService {
         const subscriptionObject = {
             id: subscriptionStripe.id,
             status: subscriptionStripe.status,
-            items: subscriptionStripe.items.data
+            items: subscriptionStripe.items.data,
+            metadata: {cart_id: `${cart.id}`}
         }
 
         const subscription = await this.subcriptionService_.create(subscriptionObject)
@@ -429,6 +426,10 @@ class StripeSubscriptionService extends PaymentService {
         }
 
         return recurring
+    }
+
+    async getCustomer(customerId) {
+        return await this.stripe_.customers.retrieve(customerId)
     }
 }
 

@@ -218,6 +218,7 @@ function registerApi(
   )
   try {
     const routes = require(`${pluginDetails.resolve}/api`).default
+    console.info(routes)
     if (routes) {
       app.use("/", routes(rootDirectory, pluginDetails.options))
     }
@@ -247,7 +248,6 @@ function registerApi(
  */
 async function registerServices(pluginDetails: PluginDetails, container: MedusaContainer): Promise<void> {
   const files = glob.sync(`${pluginDetails.resolve}/services/[!__]*`, {})
-  console.info(files)
   await Promise.all(
     files.map(async (fn) => {
       const loaded = require(fn).default

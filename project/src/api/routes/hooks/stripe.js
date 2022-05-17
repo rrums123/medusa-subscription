@@ -57,7 +57,6 @@ export default async (req, res) => {
                 await orderService.capturePayment(order.id)
             }
             break
-
         //case "payment_intent.canceled":
         //  if (order) {
         //    await orderService.update(order._id, {
@@ -65,7 +64,6 @@ export default async (req, res) => {
         //    })
         //  }
         //  break
-
         case "payment_intent.payment_failed":
             // TODO: Not implemented yet
             break
@@ -85,9 +83,9 @@ export default async (req, res) => {
                 const customerStripe = await stripeSubscriptionService.getCustomer(subscription.customer)
                 const items = []
 
-                let customer = await customerService.retrieve(customerStripe.id).catch(() => undefined)
+                let customer = await customerService.retrieve(customerStripe.id)
 
-                if (!customer) {
+                if (customer instanceof MedusaError) {
                     customer = await customerService.create({
                         id: customerStripe.id,
                         email: customerStripe.email,
@@ -167,12 +165,10 @@ export default async (req, res) => {
 
                     updateObject.metadata({cart_id: `${cart.id}`})
 
-                    const order = await orderService.retrieveByCartId(cart.id).catch(() => undefined)
-                    console.info('check order')
-                    console.info(order)
+                    const order = await orderService.retrieveByCartId(cart.id)
 
-                    if(typeof order === undefined) {
-                        await cartService.setPaymentSession(cartId, "stripe-subscription")
+                    if(!order) {
+                        // await cartService.setPaymentSession(cartId, "stripe-subscription")
                         await cartService.authorizePayment(cartId)
                         await orderService.createFromCart(cartId)
                     }

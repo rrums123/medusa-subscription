@@ -17,10 +17,6 @@ class StripeProviderService extends PaymentService {
      *    capture: true
      *  }
      */
-    options = {
-      api_key: 'sk_test_51KedmEDFUo7wZbIt7ceD43xQ7T4eYKEOUffBJ5ECOuumqFOx6y0riAviO9smqEBQVMLBlQGYXxkNAZhxG7Mg9Knb00Go9Mjo6X',
-      webhook_secret: 'whsec_3c3f55b768a24bb92ed4165cb07c851c247f5e8710eb951294078647b05d9d7e',
-    }
     this.options_ = options
 
     /** @private @const {Stripe} */
@@ -174,7 +170,7 @@ class StripeProviderService extends PaymentService {
     }
 
     const paymentIntent = await this.stripe_.paymentIntents.create(
-      intentRequest
+        intentRequest
     )
 
     return paymentIntent
@@ -356,9 +352,9 @@ class StripeProviderService extends PaymentService {
    */
   constructWebhookEvent(data, signature) {
     return this.stripe_.webhooks.constructEvent(
-      data,
-      signature,
-      this.options_.webhook_secret
+        data,
+        signature,
+        this.options_.webhook_secret
     )
   }
 }

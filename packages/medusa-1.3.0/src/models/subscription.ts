@@ -11,6 +11,7 @@ import {
 import { ulid } from "ulid";
 import { SubscriptionItem } from "./subscription-item";
 import { Cart } from "./cart"
+import {DbAwareColumn} from "../utils/db-aware-column";
 
 @Entity()
 export class Subscription {
@@ -28,6 +29,9 @@ export class Subscription {
 
     @OneToMany(() => SubscriptionItem, (si) => si.subscription)
     items?: SubscriptionItem[]
+
+    @DbAwareColumn({ type: "jsonb", nullable: true })
+    metadata: any
 
     @CreateDateColumn({ nullable: false })
     created_at: Date
