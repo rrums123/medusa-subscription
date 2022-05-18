@@ -27,14 +27,6 @@ class ProductVariantSubscriber {
         this.eventBus_.subscribe("product-variant.created", async (data) => {
             await this.onProductVariantCreated(data)
         })
-
-        this.eventBus_.subscribe("product-variant.updated", async (data) => {
-            await this.onProductVariantUpdated(data)
-        })
-
-        this.eventBus_.subscribe("product-variant.deleted", async (product_variant) => {
-            await this.onProductVariantDeleted(product_variant)
-        })
     }
 
     async onProductVariantCreated(data) {
@@ -46,30 +38,6 @@ class ProductVariantSubscriber {
 
         if (productVariant.is_subscription) {
             return this.stripeSubscriptionService_.createProduct(productVariant)
-        }
-    }
-
-    async onProductVariantUpdated(data) {
-        const { id, product_id, fields } = data
-        const productVariant = await this.productVariantService_.retrieve(id, {
-            select: selects,
-            relations: relations,
-        })
-
-        if (productVariant.is_subscription) {
-            return this.stripeSubscriptionService_.updateProduct(productVariant)
-        }
-    }
-
-    async onProductVariantDeleted(data) {
-        const { id, product_id, metadata } = data
-        const productVariant = await this.productVariantService_.retrieve(id, {
-            select: selects,
-            relations: relations,
-        })
-
-        if (productVariant.is_subscription) {
-            return this.stripeSubscriptionService_.deleteProduct(productVariant)
         }
     }
 }
