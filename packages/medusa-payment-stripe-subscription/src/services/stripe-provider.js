@@ -114,6 +114,7 @@ class StripeProviderService extends PaymentService {
     try {
       const stripeCustomer = await this.stripe_.customers.create({
         email: customer.email,
+        metadata: {customer_id: `${customer.id}`}
       })
 
       if (customer.id) {
