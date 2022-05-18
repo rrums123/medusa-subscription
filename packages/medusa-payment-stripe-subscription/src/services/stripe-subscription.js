@@ -1,5 +1,6 @@
 import Stripe from "stripe"
 import {PaymentService} from "medusa-interfaces"
+import {MedusaError} from "medusa-core-utils";
 
 class StripeSubscriptionService extends PaymentService {
     static identifier = "stripe-subscription"
@@ -146,11 +147,10 @@ class StripeSubscriptionService extends PaymentService {
                 subscriptionRequest.customer = stripeCustomer.id
             }
         } else {
-            const stripeCustomer = await this.createCustomer({
-                email,
-            })
-
-            subscriptionRequest.customer = stripeCustomer.id
+            throw new MedusaError(
+                MedusaError.Types.NOT_ALLOWED,
+                `Please register or login first`
+            )
         }
 
         const subscriptionStripe = await this.stripe_.subscriptions.create(subscriptionRequest);
@@ -428,8 +428,12 @@ class StripeSubscriptionService extends PaymentService {
         return recurring
     }
 
-    async getCustomer(customerId) {
+    async retrieveCustomer(customerId) {
         return await this.stripe_.customers.retrieve(customerId)
+    }
+
+    async updateCustomer(customerId, object) {
+        return await this.stripe_.customers.update(customerId, object)
     }
 }
 
