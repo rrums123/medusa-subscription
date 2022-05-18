@@ -483,9 +483,9 @@ class OrderService extends BaseService {
         }
       )
 
-      await completeOrderJob.finished().catch((error) => {
-        throw error
-      })
+      // await completeOrderJob.finished().catch((error) => {
+      //   throw error
+      // })
 
       order.status = "completed"
 
