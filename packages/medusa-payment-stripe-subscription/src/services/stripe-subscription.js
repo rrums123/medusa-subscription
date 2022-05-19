@@ -105,24 +105,8 @@ class StripeSubscriptionService extends PaymentService {
     async createPayment(cart) {
         let {customer_id, region_id, email} = cart
         const region = await this.regionService_.retrieve(region_id)
-        const {currency_code} = region
 
-        const cart_items = cart.items;
-        const items = [];
-
-        let cart_item;
-        for (cart_item of cart_items) {
-            let product = await this.stripe_.products.retrieve(cart_item.variant_id)
-
-            let prices = await this.stripe_.prices.list({
-                currency: currency_code,
-                product: product.id
-            })
-
-            let price = prices.data[0]
-
-            items.push({ price: price.id })
-        }
+        const items = await this.createItemsForSubscriptionStripe(cart);
 
         const subscriptionRequest = {
             items: items,
@@ -174,6 +158,22 @@ class StripeSubscriptionService extends PaymentService {
         })
 
         return subscriptionStripe
+    }
+
+
+    async createItemsForSubscriptionStripe(cart) {
+        let { region_id ,items : cartItems } = cart
+        const region = await this.regionService_.retrieve(region_id)
+        const {currency_code} = region
+        const items = []
+        for (const cartItem of cartItems) {
+            let price = (await this.stripe_.prices.list({
+                currency: currency_code,
+                product: cartItem.variant_id
+            })).data[0]
+            items.push({price: price.id})
+        }
+        return items
     }
 
     /**
@@ -353,16 +353,7 @@ class StripeSubscriptionService extends PaymentService {
             product = await this.stripe_.products.update(product.id, {
                 name: title
             })
-
-            for (let price of prices) {
-                let currency = price.currency_code
-                const priceStripe = await this.stripe_.prices.update(price.id, {
-                    product: product.id,
-                    recurring: this.getRecurringObject(product_variant),
-                    currency: currency,
-                    unit_amount: price.amount
-                })
-            }
+            //TODO update Prices
         }
 
         return product
