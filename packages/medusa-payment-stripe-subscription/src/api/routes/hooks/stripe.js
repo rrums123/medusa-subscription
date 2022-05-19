@@ -87,7 +87,7 @@ export default async (req, res) => {
             // handle test clock, only for testing
             if (!subscriptionData) {
                 const customerStripe = await stripeSubscriptionService.retrieveCustomer(subscription.customer)
-                console.info(customerStripe)
+                // console.info(customerStripe)
                 let customer = await customerService.retrieve(customerStripe.metadata.customer_id).catch(() => undefined)
 
                 if (!customer) {
@@ -104,7 +104,7 @@ export default async (req, res) => {
                         metadata: {customer_id: `${customer.id}`}
                     })
 
-                    console.info(await stripeSubscriptionService.retrieveCustomer(customerStripe.id))
+                    // console.info(await stripeSubscriptionService.retrieveCustomer(customerStripe.id))
                 }
 
                 const country_code = customerStripe.address.country
@@ -140,7 +140,7 @@ export default async (req, res) => {
                 }
 
                 subscriptionData = await subscriptionService.create(subscriptionObject)
-                console.info(`subscription created ${subscriptionData.id}`)
+                // console.info(`subscription created ${subscriptionData.id}`)
                 cart = await cartService.update(cart.id, {
                     subscription_id: subscription.id
                 })
@@ -165,14 +165,11 @@ export default async (req, res) => {
             }
 
             let currentSubscription = await subscriptionService.retrieve(subscription.id)
-            console.info(`current subscription ${currentSubscription.id}`)
             let currentCart = await cartService.retrieve(currentSubscription.metadata.cart_id)
-            console.info(`current cart ${currentCart.id}`)
 
             // conditions for recurring invoice
             if (subscription.latest_invoice !== currentCart.metadata.invoice_id) {
                 let customerStripe = await stripeSubscriptionService.retrieveCustomer(subscription.customer)
-                console.info(customerStripe)
                 let customer = await customerService.retrieve(customerStripe.metadata.customer_id).catch(() => undefined)
 
                 let cart = await cartService.create({
@@ -207,12 +204,11 @@ export default async (req, res) => {
 
         case 'invoice.payment_succeeded':
             subscription = await subscriptionService.retrieve(invoice.subscription)
-            if (subscription && invoice.status === 'paid') {
-                await cartService.authorizePayment(subscription.metadata.cart_id)
-                order = await orderService.createFromCart(subscription.metadata.cart_id)
-                if (order) {
-                    await orderService.completeOrder(order.id)
-                }
+            cartId = subscription.metadata.cart_id
+            await cartService.authorizePayment(cartId)
+            order = await orderService.createFromCart(cartId)
+            if (order && invoice.status === 'paid') {
+                await orderService.capturePayment(order.id)
             }
 
             break
