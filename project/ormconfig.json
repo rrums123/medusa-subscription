@@ -1,4 +1,5 @@
 {
+  "synchronize": true,
   "cli": {
     "migrationsDir": "src/migrations"
   },

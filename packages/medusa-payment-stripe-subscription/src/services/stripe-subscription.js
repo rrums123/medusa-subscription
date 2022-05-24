@@ -66,7 +66,7 @@ class StripeSubscriptionService extends PaymentService {
      * @returns {string} the status of the payment intent
      */
     async getStatus(paymentData) {
-        return  this.stripeProviderService_.getStatus(paymentData.latest_invoice.payment_intent)
+        return this.stripeProviderService_.getStatus(paymentData.latest_invoice.payment_intent)
     }
 
     /**
@@ -146,15 +146,17 @@ class StripeSubscriptionService extends PaymentService {
             metadata: {cart_id: `${cart.id}`}
         }
 
-        const subscription = await this.subcriptionService_.create(subscriptionObject)
+        await this.subcriptionService_.create(subscriptionObject)
 
         await this.cartService_.update(cart.id, {
-            subscription_id: subscriptionStripe.id,
-            metadata: { invoice_id: subscriptionStripe.latest_invoice.id }
+            metadata: {
+                subscription_id: subscriptionStripe.id,
+                invoice_id: subscriptionStripe.latest_invoice.id
+            }
         })
 
-        const invoice = await this.stripe_.invoices.update(subscriptionStripe.latest_invoice.id, {
-            metadata: { cart_id: `${cart.id}` }
+        await this.stripe_.invoices.update(subscriptionStripe.latest_invoice.id, {
+            metadata: {cart_id: `${cart.id}`}
         })
 
         return subscriptionStripe
@@ -162,7 +164,7 @@ class StripeSubscriptionService extends PaymentService {
 
 
     async createItemsForSubscriptionStripe(cart) {
-        let { region_id ,items : cartItems } = cart
+        let {region_id, items: cartItems} = cart
         const region = await this.regionService_.retrieve(region_id)
         const {currency_code} = region
         const items = []
@@ -183,7 +185,7 @@ class StripeSubscriptionService extends PaymentService {
      */
     async retrievePayment(data) {
         try {
-            return this.stripe_.subscriptions.retrieve(data.id,{expand:['latest_invoice','latest_invoice.payment_intent']})
+            return this.stripe_.subscriptions.retrieve(data.id, {expand: ['latest_invoice', 'latest_invoice.payment_intent']})
         } catch (error) {
             throw error
         }
@@ -196,7 +198,7 @@ class StripeSubscriptionService extends PaymentService {
      */
     async getPaymentData(sessionData) {
         try {
-            return this.stripe_.subscriptions.retrieve(sessionData.data.id,{expand:['latest_invoice','latest_invoice.payment_intent']})
+            return this.stripe_.subscriptions.retrieve(sessionData.data.id, {expand: ['latest_invoice', 'latest_invoice.payment_intent']})
         } catch (error) {
             throw error
         }
@@ -220,7 +222,7 @@ class StripeSubscriptionService extends PaymentService {
     }
 
     async updatePaymentData(sessionData, updatedData) {
-      return updatedData;
+        return updatedData;
     }
 
     /**
@@ -265,7 +267,7 @@ class StripeSubscriptionService extends PaymentService {
     async capturePayment(payment) {
         const {id} = payment.data
         try {
-            return  this.stripe_.subscriptions.retrieve(id)
+            return this.stripe_.subscriptions.retrieve(id)
         } catch (error) {
             throw error
         }
@@ -317,7 +319,7 @@ class StripeSubscriptionService extends PaymentService {
      */
     async createProduct(product_variant) {
         const product_title = product_variant.product.title
-        const title =  product_title + " / " + product_variant.title
+        const title = product_title + " / " + product_variant.title
         const prices = product_variant.prices
         const product = await this.stripe_.products.create({
             id: product_variant.id,
@@ -344,7 +346,7 @@ class StripeSubscriptionService extends PaymentService {
      */
     async updateProduct(product_variant) {
         const product_title = product_variant.product.title
-        const title =  product_title + " / " + product_variant.title
+        const title = product_title + " / " + product_variant.title
         const prices = product_variant.prices
 
         let product = await this.stripe_.products.retrieve(product_variant.id)
@@ -396,23 +398,23 @@ class StripeSubscriptionService extends PaymentService {
 
     getRecurringObject(product_variant) {
         let recurring = {}
-
-        if (product_variant.subscription_period === 'weekly') {
+        let subscription_period = product_variant.metadata.subscription_period
+        if (subscription_period === 'weekly') {
             recurring = {
                 interval: 'week'
             }
-        } else if (product_variant.subscription_period === 'monthly' || product_variant.subscription_period === '') {
+        } else if (subscription_period === 'monthly' || subscription_period === '') {
             recurring = {
                 interval: 'month'
             }
-        } else if (product_variant.subscription_period === 'annually' || product_variant.subscription_period === 'yearly') {
+        } else if (subscription_period === 'annually' || subscription_period === 'yearly') {
             recurring = {
                 interval: 'year'
             }
         } else {
             recurring = {
                 interval: 'day',
-                interval_count: Number(product_variant.subscription_period)
+                interval_count: Number(subscription_period)
             }
         }
 

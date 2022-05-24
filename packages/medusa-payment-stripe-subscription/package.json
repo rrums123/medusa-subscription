@@ -2,7 +2,7 @@
   "name": "medusa-payment-stripe-subscription",
   "version": "0.0.1",
   "description": "Stripe Subscription provider for Medusa Commerce",
-  "main": "dist/index.js",
+  "main": "index.js",
   "author": "Ryan Rumlaklak",
   "license": "MIT",
   "devDependencies": {
@@ -38,7 +38,8 @@
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "medusa-core-utils": "^1.1.31",
-    "stripe": "^8.50.0"
+    "stripe": "^8.50.0",
+    "medusa-plugin-subscription": "file:../medusa-plugin-subscription/medusa-plugin-subscription-0.0.1.tgz"
   },
   "gitHead": "81a7ff73d012fda722f6e9ef0bd9ba0232d37808"
 }

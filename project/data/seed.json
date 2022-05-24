@@ -160,7 +160,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "S / White",
@@ -206,7 +211,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "M / White",
@@ -229,7 +239,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "L / Black",
@@ -252,7 +267,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "L / White",
@@ -275,7 +295,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "XL / Black",
@@ -298,7 +323,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "XL / White",
@@ -321,7 +351,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         }
       ]
     },
@@ -361,7 +396,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "M",
@@ -381,7 +421,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "L",
@@ -401,7 +446,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "XL",
@@ -421,7 +471,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         }
       ]
     },
@@ -461,7 +516,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "M",
@@ -481,7 +541,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "L",
@@ -501,7 +566,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "XL",
@@ -521,7 +591,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         }
       ]
     },
@@ -561,7 +636,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "M",
@@ -581,7 +661,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "L",
@@ -601,7 +686,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "XL",
@@ -621,7 +711,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         }
       ]
     },
@@ -661,7 +756,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "M",
@@ -681,7 +781,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "L",
@@ -701,7 +806,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "XL",
@@ -721,7 +831,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         }
       ]
     },
@@ -761,7 +876,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "M",
@@ -781,7 +901,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "L",
@@ -801,7 +926,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         },
         {
           "title": "XL",
@@ -821,7 +951,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         }
       ]
     },
@@ -860,7 +995,12 @@
             }
           ],
           "inventory_quantity": 100,
-          "manage_inventory": true
+          "manage_inventory": true,
+          "metadata": {
+            "is_subscription": false,
+            "is_digital": false,
+            "subscription_period": null
+          }
         }
       ]
     }

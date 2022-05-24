@@ -1,6 +1,3 @@
-import {MedusaError} from "medusa-core-utils";
-import {Stripe} from "stripe";
-
 export default async (req, res) => {
     const signature = req.headers["stripe-signature"]
 
@@ -81,72 +78,6 @@ export default async (req, res) => {
             break
 
         case 'customer.subscription.created':
-            subscription = object
-            let subscriptionData = await subscriptionService.retrieve(subscription.id)
-
-            // handle test clock, only for testing
-            if (!subscriptionData) {
-                const customerStripe = await stripeSubscriptionService.retrieveCustomer(subscription.customer)
-                // console.info(customerStripe)
-                let customer = await customerService.retrieve(customerStripe.metadata.customer_id).catch(() => undefined)
-
-                if (!customer) {
-                    customer = await customerService.create({
-                        metadata: {stripe_id: customerStripe.id},
-                        email: customerStripe.email,
-                        first_name: customerStripe.name,
-                        last_name: customerStripe.name,
-                        password: "password",
-                        phone: customerStripe.phone
-                    })
-
-                    await stripeSubscriptionService.updateCustomer(customerStripe.id, {
-                        metadata: {customer_id: `${customer.id}`}
-                    })
-
-                    // console.info(await stripeSubscriptionService.retrieveCustomer(customerStripe.id))
-                }
-
-                const country_code = customerStripe.address.country
-                const region = await regionService.retrieveByCountryCode(country_code)
-
-                let cart = await cartService.create({
-                    metadata: {invoice_id: subscription.latest_invoice},
-                    country_code: country_code,
-                    region_id: region.id,
-                    email: customer.email,
-                    customer_id: customer.id
-                })
-
-                let lineItem
-                let productVariant
-                for (let item of subscription.items.data) {
-                    productVariant = await productVariantService.retrieve(item.plan.product)
-                    lineItem = await lineItemService.create({
-                        title: productVariant.product.title,
-                        description: productVariant.title,
-                        variant_id: productVariant.id,
-                        unit_price: item.plan.amount,
-                        quantity: item.quantity
-                    })
-                    await cartService.addLineItem(cart.id, lineItem)
-                }
-
-                const subscriptionObject = {
-                    id: subscription.id,
-                    status: subscription.status,
-                    items: subscription.items.data,
-                    metadata: {cart_id: `${cart.id}`}
-                }
-
-                subscriptionData = await subscriptionService.create(subscriptionObject)
-                // console.info(`subscription created ${subscriptionData.id}`)
-                cart = await cartService.update(cart.id, {
-                    subscription_id: subscription.id
-                })
-
-            }
-
             break
 
         case 'customer.subscription.deleted':
@@ -173,8 +104,10 @@ export default async (req, res) => {
                 let customer = await customerService.retrieve(customerStripe.metadata.customer_id).catch(() => undefined)
 
                 let cart = await cartService.create({
-                    subscription_id: subscription.id,
-                    metadata: {invoice_id: subscription.latest_invoice},
+                    metadata: {
+                        subscription_id: subscription.id,
+                        invoice_id: subscription.latest_invoice
+                    },
                     region_id: currentCart.region_id,
                     email: customer.email,
                     customer_id: customer.id

@@ -2,9 +2,7 @@ const selects = [
     "id",
     "product_id",
     "title",
-    "is_subscription",
-    "is_digital",
-    "subscription_period",
+    "metadata",
 ];
 
 const relations = [
@@ -36,7 +34,9 @@ class ProductVariantSubscriber {
             relations: relations,
         })
 
-        if (productVariant.is_subscription) {
+        console.info(productVariant.metadata)
+
+        if (productVariant.metadata.hasOwnProperty('is_subscription') && productVariant.metadata.is_subscription === true) {
             return this.stripeSubscriptionService_.createProduct(productVariant)
         }
     }

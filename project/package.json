@@ -7,10 +7,10 @@
   "scripts": {
     "seed": "medusa seed -f ./data/seed.json",
     "build": "babel src -d dist --extensions \".ts,.js\"",
-    "start": "rm -rf dist && medusa develop"
+    "start": "medusa develop"
   },
   "dependencies": {
-    "@medusajs/medusa": "file:../packages/medusa-1.3.0/medusajs-medusa-1.3.0.tgz",
+    "@medusajs/medusa": "^1.3.0",
     "@medusajs/medusa-cli": "^1.1.22",
     "dotenv": "^16.0.0",
     "medusa-fulfillment-manual": "^1.1.26",

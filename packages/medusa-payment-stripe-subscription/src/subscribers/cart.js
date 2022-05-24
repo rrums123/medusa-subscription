@@ -4,6 +4,7 @@ const selects = [
   "shipping_total",
   "discount_total",
   "total",
+  "metadata"
 ];
 
 const relations = [
